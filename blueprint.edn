@@ -1,0 +1,11 @@
+[{:itonami.blueprint/social-impact [:civil-military-governance :organizational-transparency :accountability]
+  :itonami.blueprint/domain :military/administration
+  :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger]
+  :itonami.blueprint/isco-08 "0310"
+  :itonami.blueprint/name "Enlisted Administrative Support"
+  :itonami.blueprint/governor :enlisted-admin-governor
+  :itonami.blueprint/robotics true
+  :db/id -1
+  :itonami.blueprint/status :public-oss
+  :itonami.blueprint/id "cloud-itonami-isco-0310"
+  :itonami.blueprint/license "AGPL-3.0-or-later"}]

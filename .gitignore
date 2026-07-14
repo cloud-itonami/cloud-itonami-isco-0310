@@ -1,0 +1,12 @@
+target/
+.cpcache/
+.nrepl-port
+*.swp
+*.swo
+*~
+.DS_Store
+node_modules/
+dist/
+.idea/
+*.iml
+.vscode/
