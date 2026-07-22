@@ -7,5 +7,34 @@
   :itonami.blueprint/robotics true
   :db/id -1
   :itonami.blueprint/status :public-oss
+  :itonami.blueprint/maturity :implemented
+  :itonami.blueprint/implemented-slice
+  "Enlisted Admin Advisor ⊣ Enlisted Admin Governor, a REAL compiled
+  `kotoba-lang/langgraph` StateGraph (`:intake -> :advise -> :govern
+  -> :decide -+-> :commit / :request-approval -> :commit / :hold`),
+  append-only audit ledger. Replaces a previously broken/fake actor:
+  `build-graph` called `graph/state-graph-builder`, a function that
+  never existed in `kotoba-lang/langgraph`; `run-request!` was a
+  literal stub returning `{:stub true ...}` and never touched a
+  compiled graph; `store/add-record!` existed but was dead code, only
+  ever called from tests. Now: a genuine `interrupt-before
+  #{:request-approval}` + in-memory checkpointer pauses escalated
+  requests for real human sign-off (`approve!` resumes the SAME
+  compiled graph via the graph's own `:request-approval -> :commit`
+  edge, not a hand-rolled parallel commit path), and BOTH `:commit`
+  and `:hold` durably append to the real audit ledger (`store/add-
+  record!`) — a held HARD-violation proposal is now also queryable
+  audit history, not silently discarded. Store gained a `DatomicStore`
+  (via `kotoba-lang/langchain-store`, no hand-rolled EDN-blob codec)
+  alongside `MemStore`, proven ≡ by a new store-contract test. Four
+  ops (`:schedule-training` / `:log-readiness-report` /
+  `:draft-correspondence` / `:process-leave-request`), all `:effect
+  :propose` only. HARD invariants (unregistered enlisted member,
+  non-`:propose` effect, closed scope-boundary allowlist covering
+  personnel deployment/command authority/weapons/targeting/classified
+  operations/lethal decisions) always `:hold`; escalation invariants
+  (below-threshold readiness, active-status leave, low confidence,
+  training/correspondence ops) always require human sign-off. 18
+  tests / 69 assertions green, clj-kondo 0 errors."
   :itonami.blueprint/id "cloud-itonami-isco-0310"
   :itonami.blueprint/license "AGPL-3.0-or-later"}]
