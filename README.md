@@ -64,39 +64,57 @@ Resolves via [`kotoba-lang/occupation`](https://github.com/kotoba-lang/occupatio
 ## Reference implementation (`:maturity :implemented`)
 
 Full itonami Actor pattern (per ADR-2607011000 / CLAUDE.md's Actors
-section): a real
+section): a REAL, compiled
 [`kotoba-lang/langgraph`](https://github.com/kotoba-lang/langgraph)
 `StateGraph`, with the Advisor and Governor as distinct graph nodes and
-human-in-the-loop interrupt/resume via checkpointing.
+GENUINE human-in-the-loop interrupt/resume via checkpointing (not a
+`:phase` flag on an already-finished run). An earlier version of this
+repo called a `graph/state-graph-builder` function that never existed
+anywhere in `kotoba-lang/langgraph`'s history, and `run-request!` was a
+literal stub (`{:stub true :reason "full langgraph.graph requires
+runtime binding"}`) that never touched a compiled graph at all — both
+went uncaught because no test exercised `enlisted-admin.actor`. That
+gap is now closed (`test/enlisted_admin/actor_test.cljc`).
 
 ```text
-:intake -> :advise -> :govern -> :decide -+-> :commit            (:ok? true)
-                                           +-> :request-approval   (:escalate? true, interrupt-before)
-                                           +-> :hold               (:hard? true)
+:intake -> :advise -> :govern -> :decide -+-> :commit                        (:hard? false, :escalate? false)
+                                           +-> :request-approval -> :commit    (:escalate? true, interrupt-before)
+                                           +-> :hold                          (:hard? true)
 ```
 
-- `src/enlisted_admin/store.cljc` — `Store` protocol + `MemStore`:
-  registered enlisted personnel/units, committed administrative records, an append-only audit ledger.
+- `src/enlisted_admin/store.cljc` — `Store` protocol + `MemStore` +
+  `DatomicStore` (via [`kotoba-lang/langchain-store`](https://github.com/kotoba-lang/langchain-store),
+  no hand-rolled EDN-blob codec): registered enlisted personnel/units,
+  and the append-only audit ledger (`add-record!`/`records`). Both
+  backends pass the same contract
+  (`test/enlisted_admin/store_contract_test.cljc`).
 - `src/enlisted_admin/advisor.cljc` — `Advisor` protocol; `mock-advisor`
   (deterministic, default) proposes an administrative operation from a
   request; `llm-advisor` wraps a `langchain.model/ChatModel` — either
   way the advisor only ever produces a `:propose`-effect proposal,
   never a committed record, and LLM parse failures always yield
   `confidence 0.0` (forces escalation, never fabricated confidence).
-- `src/enlisted_admin/governor.cljc` — `EnlistedAdminGovernor/check`: a pure
-  function, wired as its own `:govern` node. Hard invariants
+- `src/enlisted_admin/governor.cljc` — `EnlistedAdminGovernor/check`: a
+  pure function, wired as its own `:govern` node. Hard invariants
   (unregistered enlisted member, a proposal whose `:effect` isn't `:propose`, any
   proposal touching deployment/command/weapons/classified operations) always
   route to `:hold`. Escalation invariants (readiness reports below threshold,
   leave requests during active-status periods, or low advisor confidence)
-  always route to `:request-approval` — an `interrupt-before` node that
-  the graph checkpoints and only resumes on explicit human approval
-  (`actor/approve!`).
+  always route to `:request-approval` — a genuine `interrupt-before` node
+  the compiled graph pauses at (checkpointed) and only resumes past on
+  explicit human approval (`actor/approve!`, which re-enters the SAME
+  compiled graph via its own `:request-approval -> :commit` edge).
 - `src/enlisted_admin/actor.cljc` — `build-graph`, `run-request!`,
-  `approve!`: the `langgraph.graph/state-graph` wiring itself.
+  `approve!`: the REAL `langgraph.graph/state-graph` wiring
+  (`state-graph`/`add-node`/`add-edge`/`add-conditional-edges`/
+  `compile-graph`). BOTH `:commit` and `:hold` durably append to the
+  real audit ledger (`store/add-record!`) — previously `add-record!`
+  was dead code from this actor's point of view, only ever called from
+  tests.
 
 ```bash
-clojure -M:test
+clojure -M:lint       # clj-kondo, 0 errors
+clojure -M:dev:test    # 18 tests / 69 assertions, green
 ```
 
 This is what backs this repo's `:maturity :implemented` entry in
