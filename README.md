@@ -74,7 +74,7 @@ anywhere in `kotoba-lang/langgraph`'s history, and `run-request!` was a
 literal stub (`{:stub true :reason "full langgraph.graph requires
 runtime binding"}`) that never touched a compiled graph at all — both
 went uncaught because no test exercised `enlisted-admin.actor`. That
-gap is now closed (`test/enlisted_admin/actor_test.cljc`).
+gap is now closed (`test/enlisted_admin/actor_test.kotoba`).
 
 ```text
 :intake -> :advise -> :govern -> :decide -+-> :commit                        (:hard? false, :escalate? false)
@@ -82,19 +82,19 @@ gap is now closed (`test/enlisted_admin/actor_test.cljc`).
                                            +-> :hold                          (:hard? true)
 ```
 
-- `src/enlisted_admin/store.cljc` — `Store` protocol + `MemStore` +
+- `src/enlisted_admin/store.kotoba` — `Store` protocol + `MemStore` +
   `DatomicStore` (via [`kotoba-lang/langchain-store`](https://github.com/kotoba-lang/langchain-store),
   no hand-rolled EDN-blob codec): registered enlisted personnel/units,
   and the append-only audit ledger (`add-record!`/`records`). Both
   backends pass the same contract
-  (`test/enlisted_admin/store_contract_test.cljc`).
-- `src/enlisted_admin/advisor.cljc` — `Advisor` protocol; `mock-advisor`
+  (`test/enlisted_admin/store_contract_test.kotoba`).
+- `src/enlisted_admin/advisor.kotoba` — `Advisor` protocol; `mock-advisor`
   (deterministic, default) proposes an administrative operation from a
   request; `llm-advisor` wraps a `langchain.model/ChatModel` — either
   way the advisor only ever produces a `:propose`-effect proposal,
   never a committed record, and LLM parse failures always yield
   `confidence 0.0` (forces escalation, never fabricated confidence).
-- `src/enlisted_admin/governor.cljc` — `EnlistedAdminGovernor/check`: a
+- `src/enlisted_admin/governor.kotoba` — `EnlistedAdminGovernor/check`: a
   pure function, wired as its own `:govern` node. Hard invariants
   (unregistered enlisted member, a proposal whose `:effect` isn't `:propose`, any
   proposal touching deployment/command/weapons/classified operations) always
@@ -104,7 +104,7 @@ gap is now closed (`test/enlisted_admin/actor_test.cljc`).
   the compiled graph pauses at (checkpointed) and only resumes past on
   explicit human approval (`actor/approve!`, which re-enters the SAME
   compiled graph via its own `:request-approval -> :commit` edge).
-- `src/enlisted_admin/actor.cljc` — `build-graph`, `run-request!`,
+- `src/enlisted_admin/actor.kotoba` — `build-graph`, `run-request!`,
   `approve!`: the REAL `langgraph.graph/state-graph` wiring
   (`state-graph`/`add-node`/`add-edge`/`add-conditional-edges`/
   `compile-graph`). BOTH `:commit` and `:hold` durably append to the
