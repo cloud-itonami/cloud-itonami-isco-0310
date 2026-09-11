@@ -113,8 +113,8 @@ gap is now closed (`test/enlisted_admin/actor_test.kotoba`).
   tests.
 
 ```bash
-clojure -M:lint       # clj-kondo, 0 errors
-clojure -M:dev:test    # 18 tests / 69 assertions, green
+kbb -M:lint       # clj-kondo, 0 errors
+kbb -M:dev:test    # 18 tests / 69 assertions, green
 ```
 
 This is what backs this repo's `:maturity :implemented` entry in

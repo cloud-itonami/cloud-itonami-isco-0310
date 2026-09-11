@@ -25,7 +25,7 @@ jobs:
       - uses: DeLaGuardo/setup-clojure@13.4
         with: { cli: latest }
       - name: clj-kondo (errors fail the build)
-        run: clojure -M:lint
+        run: kbb -M:lint
 
   test:
     runs-on: ubuntu-latest
@@ -50,4 +50,4 @@ jobs:
         with: { cli: latest }
       - name: test (governor · store · store-contract · actor, real compiled StateGraph end-to-end)
         working-directory: orgs/cloud-itonami/cloud-itonami-isco-0310
-        run: clojure -M:dev:test
+        run: kbb -M:dev:test
