@@ -15,7 +15,7 @@ By participating, you are expected to uphold this code.
 
 ## Pull Request Process
 
-1. Ensure all tests pass: `clojure -M:test`
+1. Ensure all tests pass: `kbb -M:test`
 2. Update documentation for any behavioral changes.
 3. Follow the existing code style (CLJC, idiomatic Clojure).
 4. Keep the scope of PRs focused on a single concern.
@@ -25,7 +25,7 @@ By participating, you are expected to uphold this code.
 All contributions must pass the test suite:
 
 ```bash
-clojure -M:test
+kbb -M:test
 ```
 
 ## License
