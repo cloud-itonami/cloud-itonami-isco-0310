@@ -1,0 +1,34 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; README "Robotics premise": a document-handling and coordination robot
+;; manages training schedules, readiness reporting and administrative
+;; correspondence for enlisted armed forces personnel (ISCO 0310). Its
+;; physical work is distributing mail and forms: pushing the distribution
+;; cart along the barracks corridor, and feeding form stacks into the
+;; document scanner.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-0310"
+ :cases
+ [{:id :barracks-mail-run
+   :kind :transport
+   :procedure "distribution robot carries the unit's mail and leave forms 80 m down the barracks corridor to the company office"
+   :params {:mass-kg 35.0 :distance-m 80.0 :v-max-mps 1.2 :a-max-mps2 0.6
+            :brake-decel-mps2 0.9 :drive-force-n 70.0 :crr 0.015
+            :cog-height-m 0.50 :support-half-length-m 0.25}
+   :sweep {:param :payload-kg :values [5.0 20.0 40.0 70.0 100.0]}
+   :quantity :cycle-time-s
+   :limit {:max 80.0 :basis "estimate: one corridor run inside the unit's morning distribution window, leaving time for door stops"}
+   :boundary {:lo 1.0 :hi 400.0}}
+  {:id :scanner-feed-stack
+   :kind :manipulator
+   :procedure "desk arm moves a 1.5 kg stack of completed forms from the in-tray to the document scanner feeder; move time swept"
+   :params {:l1-m 0.35 :l2-m 0.30 :m1-kg 2.5 :m2-kg 1.8 :payload-kg 1.5
+            :from [0.45 0.05] :to [0.10 0.45] :steps 400}
+   :sweep {:param :duration-s :values [0.4 0.6 0.8 1.2 2.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 25.0 :basis "estimate: rated shoulder torque of a ~3 kg-payload desktop arm"}
+   :boundary {:lo 0.2 :hi 3.0}}]}
