@@ -8,16 +8,17 @@
  :deps {
         ;; kotoba.robotics.process: the process-physics solvers and probe this
         ;; repo's physics.edn runs on (physical-AI bot, scripts/physical-ai-bots).
-        io.github.kotoba-lang/robotics {:local/root "../../kotoba-lang/robotics"}
+        io.github.kotoba-lang/robotics
+        {:local/root "../../kotoba-lang/kotoba/lib/kotoba.robotics"}
 io.github.kotoba-lang/langgraph
-        {:local/root "../../kotoba-lang/langgraph"}
+        {:local/root "../../kotoba-lang/kotoba/lib/kotoba.langgraph"}
         ;; langchain-store: the shared langchain.db store seam
         ;; (EDN-blob codec + identity schema + event-log read/append
         ;; helpers) that ~190 cloud-itonami actors hand-roll
         ;; (ADR-2607141600); enlisted-admin.store's DatomicStore uses it
         ;; instead of its own enc/dec* two-liner.
         io.github.kotoba-lang/langchain-store
-        {:local/root "../../kotoba-lang/langchain-store"}}
+        {:local/root "../../kotoba-lang/kotoba/lib/kotoba.langchainStore"}}
  :aliases
  {
   ;; kbb -M:physics -> the physical-AI bot's measurement: runs physics.edn on
